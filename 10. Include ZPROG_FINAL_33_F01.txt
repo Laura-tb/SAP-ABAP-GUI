@@ -1,0 +1,951 @@
+*&---------------------------------------------------------------------*
+*& Include          ZPROG_FINAL_33_F01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Form main
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM main .
+
+  "Obtener datos y mostrar en ALV
+  PERFORM consulta_bd.
+
+  IF gt_zconc_zcoc[] IS NOT INITIAL.
+    CALL SCREEN 100.
+  ELSE.
+    MESSAGE s398(00) WITH 'No existen datos con el criterio aplicado'.
+  ENDIF.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form consulta_bd
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM consulta_bd .
+
+  SELECT zconc_33~cod_conc,
+         zconc_33~nombre_conc,
+         zcoc_33~cod_coche,
+         zcoc_33~marca,
+         zcoc_33~modelo,
+         zcoc_33~color,
+         zconc_33~resp_conc,
+         zconc_33~telefono_conc,
+         zconc_33~url_conc
+    INTO TABLE @gt_zconc_zcoc
+    FROM zconc_33
+    INNER JOIN zcoc_33
+*    LEFT OUTER JOIN zcoc_33
+    ON zconc_33~cod_conc = zcoc_33~cod_conc
+    WHERE
+        zconc_33~cod_conc IN @so_codco AND
+        zcoc_33~marca IN @so_marca AND
+        zcoc_33~modelo IN @so_model AND
+        zcoc_33~color IN @so_color.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'Consulta BD OK.'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    gv_text_log = 'Error: Fallo en la consulta.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form crear_catalogo
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM crear_catalogo .
+*COD_CONC  ZED_COD_CONC_33
+*NOMBRE_CONC  ZED_NOMBRE_CONC_33
+*COD_COCHE  ZED_COD_COCHE_33
+*MARCA  ZED_MARCA_33
+*MODELO  ZED_MODELO_33
+*COLOR  ZED_COLOR_33
+*RESP_CONC  ZED_RESP_CONC_33
+*TELEFONO_CONC  ZED_TELF_CONC_33
+*URL_CONC  ZED_URL_CONC_33
+
+  gs_fieldcat-fieldname = 'COD_CONC'.
+  gs_fieldcat-seltext   = 'Cod.Conces'.
+  gs_fieldcat-scrtext_m = 'Código Concesionario'.
+  gs_fieldcat-col_pos   = 1.
+  gs_fieldcat-outputlen = 6.
+  gs_fieldcat-datatype  = 'ZED_COD_CONC_33'.
+  gs_fieldcat-key       = 'X'.
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'NOMBRE_CONC'.
+  gs_fieldcat-seltext   = 'Nom.Conces'.
+  gs_fieldcat-scrtext_m = 'Nombre Concesionario'.
+  gs_fieldcat-col_pos   = 2.
+  gs_fieldcat-outputlen = 20.
+  gs_fieldcat-datatype  = 'ZED_NOMBRE_CONC_33'.
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'COD_COCHE'.
+  gs_fieldcat-seltext   = 'Cod.Coche'.
+  gs_fieldcat-scrtext_m = 'Código Coche'.
+  gs_fieldcat-col_pos   = 3.
+  gs_fieldcat-outputlen = 10.
+  gs_fieldcat-datatype  = 'ZED_COD_COCHE_33'.
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'MARCA'.
+  gs_fieldcat-seltext   = 'Marca.Coche'.
+  gs_fieldcat-scrtext_m = 'Marca Coche'.
+  gs_fieldcat-col_pos   = 4.
+  gs_fieldcat-outputlen = 20.
+  gs_fieldcat-datatype  = 'ZED_MARCA_33'.
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'MODELO'.
+  gs_fieldcat-seltext   = 'Mod.Coche'.
+  gs_fieldcat-scrtext_m = 'Modelo Coche'.
+  gs_fieldcat-col_pos   = 5.
+  gs_fieldcat-outputlen = 20.
+  gs_fieldcat-datatype  = 'ZED_MODELO_33'.
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'COLOR'.
+  gs_fieldcat-seltext   = 'Col.Coche'.
+  gs_fieldcat-scrtext_m = 'Color Coche'.
+  gs_fieldcat-col_pos   = 6.
+  gs_fieldcat-outputlen = 20.
+  gs_fieldcat-datatype  = 'ZED_COLOR_33'.
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'RESP_CONC'.
+  gs_fieldcat-seltext   = 'Resp.Conce'.
+  gs_fieldcat-scrtext_m = 'Responsable Concesionario'.
+  gs_fieldcat-col_pos   = 7.
+  gs_fieldcat-outputlen = 30.
+  gs_fieldcat-datatype  = 'ZED_RESP_CONC_33'.
+  gs_fieldcat-no_out    = 'X'. " Ocultar
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'TELEFONO_CONC'.
+  gs_fieldcat-seltext   = 'Telf.Conce'.
+  gs_fieldcat-scrtext_m = 'Telefono Concesionario'.
+  gs_fieldcat-col_pos   = 8.
+  gs_fieldcat-outputlen = 9.
+  gs_fieldcat-datatype  = 'ZED_TELF_CONC_33'.
+  gs_fieldcat-no_out    = 'X'. " Ocultar
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'URL_CONC'.
+  gs_fieldcat-seltext   = 'URL.Conce'.
+  gs_fieldcat-scrtext_m = 'URL Concesionario'.
+  gs_fieldcat-col_pos   = 9.
+  gs_fieldcat-outputlen = 20.
+  gs_fieldcat-datatype  = 'ZED_URL_CONC_33'.
+  gs_fieldcat-no_out    = 'X'. " Ocultar
+  APPEND gs_fieldcat TO gt_fieldcat.
+  CLEAR gs_fieldcat.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'Catálogo creado.'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    gv_text_log = 'Error: Fallo en la creación del catálogo.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form actualizar_alv
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM actualizar_alv .
+  "Consulta a BD
+  PERFORM consulta_bd.
+
+  "Actualizar ALV
+  CALL METHOD gcl_gui_alv_grid->refresh_table_display
+    EXCEPTIONS
+      finished = 1
+      OTHERS   = 2.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'Actualización ALV OK.'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+     WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+    gv_text_log = 'Error: Fallo en la actualización de ALV.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& Form seleccionar_linea
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM seleccionar_linea .
+  DATA: lt_index_rows TYPE lvc_t_row,
+        lt_row_no     TYPE lvc_t_roid,
+        lv_lines      TYPE i,
+        lv_info       TYPE string.
+
+  CALL METHOD gcl_gui_alv_grid->get_selected_rows
+    IMPORTING
+      et_index_rows = lt_index_rows.
+
+  DESCRIBE TABLE lt_index_rows LINES lv_lines.
+
+  IF lv_lines IS INITIAL OR lv_lines GT 1.
+    MESSAGE s398(00) WITH 'Solo puede seleccionar una linea'.
+    RETURN.
+  ENDIF.
+
+  READ TABLE lt_index_rows INTO DATA(ls_index_rows) INDEX 1.
+
+  READ TABLE gt_zconc_zcoc INTO gs_zconc_zcoc INDEX ls_index_rows-index.
+
+  " Pasar datos de zconc_zcoc a gs_conc (para el popup)
+  gs_conc-cod_conc      = gs_zconc_zcoc-cod_conc.
+  gs_conc-nombre_conc   = gs_zconc_zcoc-nombre_conc.
+  gs_conc-resp_conc     = gs_zconc_zcoc-resp_conc.
+  gs_conc-telefono_conc = gs_zconc_zcoc-telefono_conc.
+  gs_conc-url_conc      = gs_zconc_zcoc-url_conc.
+
+  " Rellenar estructura gs_coche
+  gs_coche-cod_coche = gs_zconc_zcoc-cod_coche.
+  gs_coche-cod_conc  = gs_zconc_zcoc-cod_conc.
+  gs_coche-marca     = gs_zconc_zcoc-marca.
+  gs_coche-modelo    = gs_zconc_zcoc-modelo.
+  gs_coche-color     = gs_zconc_zcoc-color.
+ENDFORM.
+
+
+*&---------------------------------------------------------------------*
+*& Form popup_concesionario
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM popup_concesionario .
+
+  PERFORM seleccionar_linea.
+  CALL SCREEN 200 STARTING AT 0 10 ENDING AT 75 25. "Llamar al popup.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form crear_concesionario
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM crear_concesionario CHANGING ev_error TYPE c.
+
+  "Validar duplicados
+  SELECT SINGLE * INTO @DATA(ls_conc_existente)
+    FROM zconc_33
+    WHERE cod_conc = @gs_conc-cod_conc.
+
+*  IF sy-subrc = 0.
+*    ev_error = sy-subrc."Devuelvo valor
+*    MESSAGE 'Código de concesionario ya existe' TYPE 'S'.
+*    RETURN.
+*  ENDIF.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'Código de concesionario ya existe'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    ev_error = sy-subrc."Devuelvo valor
+    MESSAGE 'Código de concesionario ya existe' TYPE 'S'.
+    RETURN.
+  ENDIF.
+
+  IF gcl_conc_crud IS INITIAL.
+    CREATE OBJECT gcl_conc_crud.
+  ENDIF.
+
+  CALL METHOD gcl_conc_crud->create_concesionario
+    EXPORTING
+      iv_cod_conc      = gs_conc-cod_conc       " Elemento de datos codigo concesionario
+      iv_nombre_conc   = gs_conc-nombre_conc    " Elemento de datos Nombre concesionario
+      iv_resp_conc     = gs_conc-resp_conc      " Elemento de datos Responsable concesionario
+      iv_telefono_conc = gs_conc-telefono_conc  " Elemento de datos telefono concesionario
+      iv_url_conc      = gs_conc-url_conc       " Elemento de datos URL concesionario
+      is_zconc         = gs_conc                " Tabla de base de datos ZCONC
+    IMPORTING
+      ev_realizado     = gv_realizado.   " Campo de texto, longitud 1
+
+  IF gv_realizado IS NOT INITIAL.
+    CLEAR ev_error.
+    MESSAGE s398(00) WITH 'Se ha insertado correctamente'.
+    gv_text_log = 'Inserción de concesionario correcta'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE s398(00) WITH 'Se ha producido un error a la hora de insertar'.
+    gv_text_log = 'Error: Fallo de inserción de concesionario.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+  PERFORM actualizar_alv.
+
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& Form modificar_concesionario
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM modificar_concesionario .
+
+  IF gcl_conc_crud IS INITIAL.
+    CREATE OBJECT gcl_conc_crud.
+  ENDIF.
+
+  CALL METHOD gcl_conc_crud->update_concesionario
+    EXPORTING
+      iv_cod_conc      = gs_conc-cod_conc       " Elemento de datos codigo concesionario
+      iv_nombre_conc   = gs_conc-nombre_conc    " Elemento de datos Nombre concesionario
+      iv_resp_conc     = gs_conc-resp_conc      " Elemento de datos Responsable concesionario
+      iv_telefono_conc = gs_conc-telefono_conc  " Elemento de datos telefono concesionario
+      iv_url_conc      = gs_conc-url_conc       " Elemento de datos URL concesionario
+    IMPORTING
+      ev_realizado     = gv_realizado.   " Campo de texto, longitud 1
+
+*  IF gv_realizado IS NOT INITIAL.
+*    MESSAGE s398(00) WITH 'Se ha modificado correctamente'.
+*  ELSE.
+*    MESSAGE s398(00) WITH 'Se ha producido un error a la hora de modificar'.
+*  ENDIF.
+
+  IF gv_realizado IS NOT INITIAL.
+    MESSAGE s398(00) WITH 'Se ha modificado correctamente'.
+    gv_text_log = 'Modificación de concesionario correcta'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE s398(00) WITH 'Error en modificación de concesionario'.
+    gv_text_log = 'Error: Fallo de modificación de concesionario.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+  PERFORM actualizar_alv.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form eliminar_concesionario
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM eliminar_concesionario.
+
+  " Verificar si el concesionario tiene coches asociados
+  SELECT * FROM zcoc_33
+    INTO TABLE gt_coche
+    WHERE cod_conc = gs_conc-cod_conc.
+
+  IF gt_coche IS NOT INITIAL.
+    MESSAGE s398(00) WITH 'No se puede eliminar: hay coches asociados'.
+    RETURN.
+  ENDIF.
+
+  IF gcl_conc_crud IS INITIAL.
+    CREATE OBJECT gcl_conc_crud.
+  ENDIF.
+
+  CALL METHOD gcl_conc_crud->delete_concesionario
+    EXPORTING
+      iv_cod_conc  = gs_conc-cod_conc  " Elemento de datos codigo concesionario
+    IMPORTING
+      ev_realizado = gv_realizado.     " Campo de texto, longitud 1
+
+*  IF gv_realizado IS NOT INITIAL.
+*    MESSAGE s398(00) WITH 'Se ha eliminado correctamente'.
+*  ELSE.
+*    MESSAGE s398(00) WITH 'Se ha producido un error a la hora de eliminar'.
+*  ENDIF.
+
+  IF gv_realizado IS NOT INITIAL.
+    MESSAGE s398(00) WITH 'Se ha eliminado correctamente'.
+    gv_text_log = 'Eliminación de concesionario correcta'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE s398(00) WITH 'Error en eliminación de concesionario'.
+    gv_text_log = 'Error: Fallo de eliminación de concesionario.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+  PERFORM actualizar_alv.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form popup_coche
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM popup_coche .
+
+  PERFORM seleccionar_linea.
+  CALL SCREEN 201 STARTING AT 0 10 ENDING AT 75 25. "Llamar al popup.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form crear_coche
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM crear_coche CHANGING ev_error TYPE c.
+
+  "Validar duplicados COCHE
+  SELECT SINGLE * INTO @DATA(ls_coche_existente)
+    FROM zcoc_33
+    WHERE cod_coche = @gs_coche-cod_coche.
+
+*  IF sy-subrc = 0.
+*    ev_error = sy-subrc."Devuelvo valor
+*    MESSAGE 'El coche ya existe' TYPE 'S'.
+*    RETURN.
+*  ENDIF.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'El coche ya existe'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    ev_error = sy-subrc."Devuelvo valor
+    MESSAGE 'El coche ya existe' TYPE 'S'.
+    RETURN.
+  ENDIF.
+
+  PERFORM log_save.
+
+  "Validar CONCESIONARIO
+  SELECT SINGLE * INTO @DATA(ls_conc_existente)
+    FROM zconc_33
+    WHERE cod_conc = @gs_coche-cod_conc.
+
+*  IF sy-subrc <> 0.
+*    ev_error = sy-subrc."Devuelvo valor
+*    MESSAGE 'Código de concesionario no existe' TYPE 'S'.
+*    RETURN.
+*  ENDIF.
+
+  IF sy-subrc <> 0.
+    gv_text_log = 'Código de concesionario no existe'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    ev_error = sy-subrc."Devuelvo valor
+    MESSAGE 'Código de concesionario no existe' TYPE 'S'.
+    RETURN.
+  ENDIF.
+
+  PERFORM log_save.
+
+
+  IF gcl_coche_crud IS INITIAL.
+    CREATE OBJECT gcl_coche_crud.
+  ENDIF.
+
+  CALL METHOD gcl_coche_crud->create_coche
+    EXPORTING
+      iv_cod_coche = gs_coche-cod_coche     " Elemento de datos codigo coche
+      iv_cod_conc  = gs_coche-cod_conc      " Elemento de datos codigo concesionario
+      iv_marca     = gs_coche-marca         " Elemento de datos marca coche
+      iv_modelo    = gs_coche-modelo        " Elemento de datos modelo coche
+      iv_color     = gs_coche-color         " Elemento de datos Color coche
+      is_zcoc      = gs_coche               " Tabla de base de datos ZCOC
+    IMPORTING
+      ev_realizado = gv_realizado.   " Campo de texto, longitud 1
+
+*  IF gv_realizado IS NOT INITIAL.
+*    CLEAR ev_error.
+*    MESSAGE s398(00) WITH 'Se ha insertado correctamente'.
+*  ELSE.
+*    MESSAGE s398(00) WITH 'Se ha producido un error a la hora de insertar'.
+*  ENDIF.
+
+  IF gv_realizado IS NOT INITIAL.
+    CLEAR ev_error.
+    MESSAGE s398(00) WITH 'Se ha insertado correctamente'.
+    gv_text_log = 'Inserción de coche correcta'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE s398(00) WITH 'Error de inserción de coche'.
+    gv_text_log = 'Error: Fallo de inserción de coche.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+  PERFORM actualizar_alv.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form modificar_coche
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM modificar_coche .
+
+  "Validación código de coche y concesionario obligatorios
+  IF gs_coche-cod_coche IS INITIAL OR gs_coche-cod_conc IS INITIAL.
+    MESSAGE s398(00) WITH 'Código de coche y concesionario obligatorios'.
+    RETURN.
+  ENDIF.
+
+  IF gcl_coche_crud IS INITIAL.
+    CREATE OBJECT gcl_coche_crud.
+  ENDIF.
+
+  CALL METHOD gcl_coche_crud->update_coche
+    EXPORTING
+      iv_cod_coche = gs_coche-cod_coche     " Elemento de datos codigo coche
+      iv_cod_conc  = gs_coche-cod_conc      " Elemento de datos codigo concesionario
+      iv_marca     = gs_coche-marca         " Elemento de datos marca coche
+      iv_modelo    = gs_coche-modelo        " Elemento de datos modelo coche
+      iv_color     = gs_coche-color         " Elemento de datos Color coche
+    IMPORTING
+      ev_realizado = gv_realizado.   " Campo de texto, longitud 1
+
+*  IF gv_realizado IS NOT INITIAL.
+*    MESSAGE s398(00) WITH 'Se ha modificado correctamente'.
+*  ELSE.
+*    MESSAGE s398(00) WITH 'Se ha producido un error a la hora de modificar'.
+*  ENDIF.
+
+  IF gv_realizado IS NOT INITIAL.
+    MESSAGE s398(00) WITH 'Se ha modificado correctamente'.
+    gv_text_log = 'Modificación de coche correcta'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE s398(00) WITH 'Error en modificación de coche'.
+    gv_text_log = 'Error: Fallo de modificación de coche.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+  PERFORM actualizar_alv.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form eliminar_coche
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM eliminar_coche .
+
+  "Validación código de coche y concesionario obligatorios
+  IF gs_coche-cod_coche IS INITIAL OR gs_coche-cod_conc IS INITIAL.
+    MESSAGE s398(00) WITH 'Código de coche y concesionario obligatorios'.
+    RETURN.
+  ENDIF.
+
+  IF gcl_coche_crud IS INITIAL.
+    CREATE OBJECT gcl_coche_crud.
+  ENDIF.
+
+  CALL METHOD gcl_coche_crud->delete_coche
+    EXPORTING
+      iv_cod_coche = gs_coche-cod_coche                " Elemento de datos codigo coche
+    IMPORTING
+      ev_realizado = gv_realizado.     " Campo de texto, longitud 1
+
+*  IF gv_realizado IS NOT INITIAL.
+*    MESSAGE s398(00) WITH 'Se ha eliminado correctamente'.
+*  ELSE.
+*    MESSAGE s398(00) WITH 'Se ha producido un error a la hora de eliminar'.
+*  ENDIF.
+
+  IF gv_realizado IS NOT INITIAL.
+    MESSAGE s398(00) WITH 'Se ha eliminado correctamente'.
+    gv_text_log = 'Eliminación de coche correcta'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    MESSAGE s398(00) WITH 'Error en eliminación de coche'.
+    gv_text_log = 'Error: Fallo de eliminación de coche.'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ENDIF.
+
+  PERFORM log_save.
+
+  PERFORM actualizar_alv.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form imprimir_smartform
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM imprimir_smartform .
+  "Variables por defecto para smartform (import)
+  DATA: ls_ctrlparameter TYPE ssfctrlop,
+        ls_outoptions    TYPE ssfcompop,
+        g_impresion      TYPE TABLE OF ssfcresop WITH HEADER LINE,
+        ls_fmname        TYPE rs38l_fnam.
+
+  "Lanzamos la ejecucion de nuestro Smartform
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+    EXPORTING
+      formname           = 'ZSF_PROG_FINAL_33' "Nombre del smartform
+    IMPORTING
+      fm_name            = ls_fmname "El nombre tecnico, nombre del MF -> /1BCDWB/SF00000027
+    EXCEPTIONS
+      no_form            = 1
+      no_function_module = 2
+      OTHERS             = 3.
+
+  "Configurar parametros de impresion
+  ls_ctrlparameter-no_dialog = 'X'. "No mostrar el dialogo de seleccion de impresion
+  ls_ctrlparameter-preview = 'X'."Previsualizar el formulario/smartform
+  ls_outoptions-tddest = 'LP01'. "Indica una impresora
+
+  CALL FUNCTION ls_fmname
+    EXPORTING
+      control_parameters = ls_ctrlparameter "parametros de impresion
+      output_options     = ls_outoptions "parametros de impresion
+      user_settings      = ' '
+      it_zconc_zcoc      = gt_zconc_zcoc "Le pasamos datos del ALV
+    EXCEPTIONS
+      formatting_error   = 1
+      internal_error     = 2
+      send_error         = 3
+      user_canceled      = 4
+      OTHERS             = 5.
+
+*  IF sy-subrc <> 0.
+*    MESSAGE e398(00) WITH 'Error a la hora de imprimir'.
+*  ENDIF.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'Impresión SmartForm OK'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    gv_text_log = 'Impresión SmartForm ERROR'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    MESSAGE e398(00) WITH 'Error a la hora de imprimir'.
+  ENDIF.
+
+  PERFORM log_save.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form enviar_email
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM popup_email .
+
+  PERFORM seleccionar_linea.
+  CALL SCREEN 202 STARTING AT 0 10 ENDING AT 70 15. "Llamar al popup.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form enviar_email
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM enviar_email .
+
+  DATA: lo_send_request TYPE REF TO cl_bcs,
+        lo_document     TYPE REF TO cl_document_bcs,
+        lo_recipient    TYPE REF TO if_recipient_bcs,
+        lt_contents_txt TYPE soli_tab,
+        lv_cuerpo       TYPE string,
+        lv_subject      TYPE so_obj_des.
+
+  " Crear el cuerpo del mensaje
+  CONCATENATE 'INFORMACIÓN DEL COCHE:'
+              'Código de coche: '     gs_coche-cod_coche
+              'Código de Concesionario: ' gs_coche-cod_conc
+              'Marca: '      gs_coche-marca
+              'Modelo: '     gs_coche-modelo
+              'Color: '      gs_coche-color
+              INTO lv_cuerpo SEPARATED BY cl_abap_char_utilities=>cr_lf.
+
+  " Asunto
+  lv_subject = |INFORMACIÓN DEL COCHE|.
+
+  " Crear instancia del envío
+  lo_send_request = cl_bcs=>create_persistent( ).
+
+  " Crear el documento
+  APPEND lv_cuerpo TO lt_contents_txt.
+  lo_document = cl_document_bcs=>create_document(
+                  i_type    = 'RAW'
+                  i_text    = lt_contents_txt
+                  i_subject = lv_subject ).
+
+  " Añadir documento al envío
+  CALL METHOD lo_send_request->set_document( lo_document ).
+
+  " Añadir destinatario
+  lo_recipient = cl_cam_address_bcs=>create_internet_address( CONV ad_smtpadr( gv_email ) ).
+  CALL METHOD lo_send_request->add_recipient
+    EXPORTING
+      i_recipient = lo_recipient
+      i_express   = 'X'.
+
+  " Enviar
+  CALL METHOD lo_send_request->send(
+    EXPORTING
+      i_with_error_screen = 'X' ).
+
+  COMMIT WORK.
+
+  IF sy-subrc = 0.
+    MESSAGE s398(00) WITH 'Email enviado correctamente'.
+    gv_text_log = 'Email enviado'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    gv_text_log = 'ERROR en envio de email'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    MESSAGE e398(00) WITH 'ERROR en envio de email'.
+  ENDIF.
+
+  PERFORM log_save.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form exportar_csv
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM exportar_csv .
+
+  DATA: lt_data        TYPE STANDARD TABLE OF zconc_zcoc_s_33,
+        lv_fullpath    TYPE string,
+        lv_path        TYPE string,
+        lv_filename    TYPE string,
+        lv_user_action TYPE i,
+        lv_filter      TYPE string.
+
+  LOOP AT gt_zconc_zcoc INTO DATA(ls_row).
+    APPEND VALUE #(
+      cod_conc      = ls_row-cod_conc
+      cod_coche     = ls_row-cod_coche
+      marca         = ls_row-marca
+      modelo        = ls_row-modelo
+      color         = ls_row-color ) TO lt_data.
+  ENDLOOP.
+
+  " Seleccionar ubicación del archivo
+  CALL METHOD cl_gui_frontend_services=>file_save_dialog
+    EXPORTING
+      window_title      = 'Guardar como'
+      default_extension = 'csv'
+      default_file_name = 'coches.csv'
+    CHANGING
+      filename          = lv_filename
+      path              = lv_path
+      fullpath          = lv_fullpath
+      user_action       = lv_user_action
+    EXCEPTIONS
+      OTHERS            = 1.
+
+  IF lv_user_action <> cl_gui_frontend_services=>action_ok.
+    gv_text_log = 'Exportación cancelada'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    MESSAGE s398(00) WITH 'Exportación cancelada'.
+    RETURN.
+  ENDIF.
+
+  " Exportar a CSV
+  CALL FUNCTION 'GUI_DOWNLOAD'
+    EXPORTING
+      filename              = lv_fullpath
+      filetype              = 'ASC'
+      write_field_separator = 'X'
+    TABLES
+      data_tab              = lt_data
+    EXCEPTIONS
+      OTHERS                = 1.
+
+*  IF sy-subrc = 0.
+*    MESSAGE s398(00) WITH 'Exportación completada correctamente'.
+*  ELSE.
+*    MESSAGE s398(00) WITH 'Error al exportar el archivo'.
+*  ENDIF.
+
+  IF sy-subrc = 0.
+    gv_text_log = 'Export CSV OK'.
+    gv_tipo_log = 'S'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+  ELSE.
+    gv_text_log = 'Export CSV ERROR'.
+    gv_tipo_log = 'E'.
+    PERFORM log_add USING gv_tipo_log gv_text_log.
+    MESSAGE e398(00) WITH 'Error al exportar el archivo'.
+  ENDIF.
+
+  PERFORM log_save.
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*& Form log_create
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM log_create .
+  DATA ls_log_header TYPE bal_s_log.
+
+  ls_log_header-object    = 'ZPROGFINAL33'.
+  ls_log_header-subobject = 'ZCONSULTA_33'.
+  ls_log_header-extnumber = 'Consulta a la DB'.
+
+  CALL FUNCTION 'BAL_LOG_CREATE'
+    EXPORTING
+      i_s_log                 = ls_log_header
+    IMPORTING
+      e_log_handle            = gv_log_handle
+    EXCEPTIONS
+      log_header_inconsistent = 1
+      OTHERS                  = 2.
+  IF sy-subrc <> 0.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form log_add
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      --> P_
+*&      --> |
+*&      --> `Fin de ejecución por `
+*&      --> {
+*&      --> SY_UNAME
+*&      --> }
+*&      --> |
+*&---------------------------------------------------------------------*
+FORM log_add USING pv_type TYPE symsgty
+                   pv_text TYPE char255.
+
+  gv_text_log = pv_text.
+
+  CALL FUNCTION 'BAL_LOG_MSG_ADD_FREE_TEXT'
+    EXPORTING
+      i_log_handle     = gv_log_handle
+      i_msgty          = pv_type  "Puede ser ‘E’,’W’,’A’,’S’
+      i_text           = gv_text_log
+      i_probclass      = '1'
+    EXCEPTIONS
+      log_not_found    = 1
+      msg_inconsistent = 2
+      log_is_full      = 3
+      OTHERS           = 4.
+  IF sy-subrc <> 0.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form log_save
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM log_save.
+  CALL FUNCTION 'BAL_DB_SAVE'
+    EXPORTING
+      i_save_all       = 'X'
+    EXCEPTIONS
+      log_not_found    = 1
+      save_not_allowed = 2
+      numbering_error  = 3
+      OTHERS           = 4.
+  COMMIT WORK.
+ENDFORM.

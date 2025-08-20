@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Report ZPROG_FINAL_33
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zprog_final_33.
+
+INCLUDE zprog_final_33_top.
+INCLUDE zprog_final_33_sel.
+INCLUDE zprog_final_33_f01.
+INCLUDE zprog_final_33_mod.
+
+START-OF-SELECTION.
+  "Crear LOG
+  PERFORM log_create.
+
+  PERFORM main.
+
+  "Añadir LOG
+  DATA lv_text TYPE char255.
+  CONCATENATE 'Fin de ejecución por ' sy-uname INTO lv_text SEPARATED BY space.
+  PERFORM log_add USING 'S' lv_text.
+
+  "Guardar LOG
+  PERFORM log_save.

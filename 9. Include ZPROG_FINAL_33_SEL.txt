@@ -1,0 +1,10 @@
+*&---------------------------------------------------------------------*
+*& Include          ZPROG_FINAL_33_SEL
+*&---------------------------------------------------------------------*
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: so_codco FOR zconc_33-cod_conc NO INTERVALS,
+                  so_marca FOR zcoc_33-marca NO INTERVALS,
+                  so_model FOR zcoc_33-modelo NO INTERVALS,
+                  so_color FOR zcoc_33-color NO INTERVALS.
+SELECTION-SCREEN END OF BLOCK b1.

@@ -1,0 +1,235 @@
+*&---------------------------------------------------------------------*
+*& Include          ZPROG_FINAL_33_MOD
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'ZSTATUS_100'.
+  SET TITLEBAR 'ZTITLEBAR_100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+
+  CASE sy-ucomm.
+    WHEN 'BACK' OR 'CANCEL' OR 'EXIT'.
+      LEAVE TO SCREEN 0.
+    WHEN OTHERS.
+  ENDCASE.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module INIT OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE init OUTPUT.
+
+  IF g_container IS INITIAL.
+    "En este punto estamos creando el contenedor
+    CREATE OBJECT g_container
+      EXPORTING
+        container_name = 'CONTAINER'.
+    "En este punto estamos creando el ALV e indicando donde se tiene que cargar.
+    CREATE OBJECT gcl_gui_alv_grid
+      EXPORTING
+        i_parent = g_container.
+
+    "Subrutina para crear catalogo del ALV
+    PERFORM crear_catalogo.
+
+    "Asignacion de eventos al ALV
+    CREATE OBJECT gcl_event. "Crear la instancia/objeto del EVENT
+    SET HANDLER: gcl_event->handle_toolbar FOR gcl_gui_alv_grid,
+                 gcl_event->handle_user_command FOR gcl_gui_alv_grid.
+  ENDIF.
+
+  "Configuracion aspecto visual ALV
+  gs_layout-zebra = 'X'.    "Visualizar una lineamas oscura y otra mas clara.
+  gs_layout-col_opt = 'X'.  "Optimiza el ancho de columna
+  gs_layout-sel_mode = 'A'. "Opcion de habilitar seleccion de linea
+
+  "3º parte. Mostrar los datos
+  CALL METHOD gcl_gui_alv_grid->set_table_for_first_display
+    EXPORTING
+      is_layout       = gs_layout
+    CHANGING
+      it_fieldcatalog = gt_fieldcat
+      it_outtab       = gt_zconc_zcoc.
+
+
+  IF sy-subrc <> 0.
+    MESSAGE e398(00) WITH 'Ha dado error el ALV'.
+  ENDIF.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0200 OUTPUT
+*&---------------------------------------------------------------------*
+*& MODULO INFO CONCESIONARIO
+*&---------------------------------------------------------------------*
+MODULE status_0200 OUTPUT.
+  SET PF-STATUS 'ZSTATUS_200'.
+  SET TITLEBAR 'ZTITLEBAR_200'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       MODULO INFO CONCESIONARIO
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+  CASE sy-ucomm.
+    WHEN 'BACK' OR 'CANCEL' OR 'EXIT' OR 'BTN_EXIT'.
+      CLEAR: gs_conc.
+      LEAVE TO SCREEN 0.
+
+    WHEN 'BTN_LIMPIAR'.
+      CLEAR gs_conc.
+
+    WHEN 'BTN_CREAR'.
+      DATA: lv_error TYPE c.
+      "Si el codigo concesionario está vacío
+      IF gs_conc-cod_conc IS INITIAL.
+        MESSAGE 'Código de concesionario obligatorio' TYPE 'S'.
+        EXIT.
+      ENDIF.
+
+      PERFORM crear_concesionario CHANGING lv_error.
+      "Si la operacion es correcta y no me devuelve ningun error
+      IF lv_error IS INITIAL.
+        CLEAR: gs_conc.
+        LEAVE TO SCREEN 0."Cierro popup
+      ENDIF.
+
+
+
+    WHEN 'BTN_MODIFICAR'.
+
+      "Si el codigo concesionario está vacío
+      IF gs_conc-cod_conc IS INITIAL.
+        MESSAGE 'Código de concesionario obligatorio' TYPE 'S'.
+        EXIT.
+      ENDIF.
+
+      PERFORM modificar_concesionario .
+
+      CLEAR: gs_conc.
+      LEAVE TO SCREEN 0."Cierro popup
+
+
+    WHEN 'BTN_ELIMINAR'.
+
+      "Si el codigo concesionario está vacío
+      IF gs_conc-cod_conc IS INITIAL.
+        MESSAGE 'Código de concesionario obligatorio' TYPE 'S'.
+        EXIT.
+      ENDIF.
+
+      PERFORM eliminar_concesionario .
+
+      CLEAR: gs_conc.
+      LEAVE TO SCREEN 0."Cierro popup
+
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0201 OUTPUT
+*&---------------------------------------------------------------------*
+*& MODULO INFO COCHE
+*&---------------------------------------------------------------------*
+MODULE status_0201 OUTPUT.
+  SET PF-STATUS 'ZSTATUS_201'.
+  SET TITLEBAR 'ZTITLEBAR_201'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0201  INPUT
+*&---------------------------------------------------------------------*
+*       MODULO INFO COCHE
+*----------------------------------------------------------------------*
+MODULE user_command_0201 INPUT.
+  CASE sy-ucomm.
+    WHEN 'BACK' OR 'CANCEL' OR 'EXIT' OR 'BTN_EXIT'.
+      CLEAR: gs_coche.
+      LEAVE TO SCREEN 0.
+
+    WHEN 'BTN_LIMPIAR'.
+      CLEAR gs_coche.
+
+    WHEN 'BTN_CREAR_COCHE'.
+
+      IF gs_coche-cod_coche IS INITIAL OR gs_coche-cod_conc IS INITIAL.
+        MESSAGE 'Código del coche y del concesionario son obligatorios' TYPE 'S'.
+        EXIT.
+      ENDIF.
+
+      PERFORM crear_coche CHANGING lv_error.
+      "Si la operacion es correcta y no me devuelve ningun error
+      IF lv_error IS INITIAL.
+        CLEAR: gs_coche.
+        LEAVE TO SCREEN 0."Cierro popup
+      ENDIF.
+
+
+    WHEN 'BTN_MODIFICAR_COCHE'.
+      IF gs_coche-cod_coche IS INITIAL OR gs_coche-cod_conc IS INITIAL.
+        MESSAGE 'Código del coche y del concesionario son obligatorios' TYPE 'S'.
+        EXIT.
+      ENDIF.
+
+      PERFORM modificar_coche.
+      CLEAR: gs_coche.
+      LEAVE TO SCREEN 0.
+
+    WHEN 'BTN_ELIMINAR_COCHE'.
+      IF gs_coche-cod_coche IS INITIAL OR gs_coche-cod_conc IS INITIAL.
+        MESSAGE 'Código del coche y del concesionario son obligatorios' TYPE 'S'.
+        EXIT.
+      ENDIF.
+
+      PERFORM eliminar_coche.
+      CLEAR: gs_coche.
+      LEAVE TO SCREEN 0.
+  ENDCASE.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0202 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0202 OUTPUT.
+  SET PF-STATUS 'ZSTATUS_202'.
+  SET TITLEBAR 'ZTITLEBAR_202'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0202  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0202 INPUT.
+
+  CASE sy-ucomm.
+    WHEN 'BACK' OR 'CANCEL' OR 'EXIT' OR 'BTN_EXIT'.
+      CLEAR gv_email.
+      LEAVE TO SCREEN 0.
+
+    WHEN 'BTN_ENVIAR'.
+      "Validar email
+      IF gv_email IS INITIAL OR NOT ( gv_email CP '*@*.*' ).
+        MESSAGE s398(00) WITH 'Introduce un email válido'.
+        RETURN.
+      ENDIF.
+
+      PERFORM enviar_email.
+
+      CLEAR gv_email.
+      LEAVE TO SCREEN 0.
+  ENDCASE.
+
+ENDMODULE.

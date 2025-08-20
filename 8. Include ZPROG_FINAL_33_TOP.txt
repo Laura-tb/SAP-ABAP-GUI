@@ -1,0 +1,122 @@
+*&---------------------------------------------------------------------*
+*& Include          ZPROG_FINAL_33_TOP
+*&---------------------------------------------------------------------*
+"Tablas de base de datos utilizadas CONCESIONARIO y COCHE
+TABLES: zconc_33, zcoc_33.
+
+"Declaracion de tipo estructura y dato tipo tabla.
+DATA: gt_conc TYPE TABLE OF zconc_33,
+      gs_conc TYPE zconc_33.
+
+DATA: gt_coche TYPE TABLE OF zcoc_33,
+      gs_coche TYPE zcoc_33.
+
+DATA: gt_zconc_zcoc TYPE zconc_zcoc_tt_33,
+      gs_zconc_zcoc TYPE zconc_zcoc_s_33.
+
+"Variables para ALV CON CATALOGO
+DATA: gcl_gui_alv_grid TYPE REF TO cl_gui_alv_grid,
+      g_container      TYPE REF TO cl_gui_custom_container,
+      gs_layout        TYPE lvc_s_layo.
+
+"CONFIGURACIÓN DEL CATALOGO (FIELDCAT)
+DATA: gt_fieldcat TYPE lvc_t_fcat,
+      gs_fieldcat TYPE lvc_s_fcat.
+
+"Variable EXPORT
+DATA: gv_realizado TYPE char01.
+
+"Declarar variable de tipo clase
+DATA: gcl_conc_crud   TYPE REF TO zcl_conc_crud_33.
+DATA: gcl_coche_crud   TYPE REF TO zcl_coc_crud_33.
+
+"Variables enviar email
+DATA: gv_email  TYPE zed_email_33.
+
+"EVENTOS ALV
+CLASS lcl_event DEFINITION.
+  PUBLIC SECTION.
+    METHODS: handle_toolbar FOR EVENT toolbar OF cl_gui_alv_grid
+      IMPORTING e_object e_interactive,
+      handle_user_command FOR EVENT user_command OF cl_gui_alv_grid
+        IMPORTING e_ucomm.
+
+ENDCLASS.
+
+CLASS lcl_event IMPLEMENTATION.
+
+  METHOD: handle_toolbar.
+    DATA: ls_toolbar TYPE stb_button.
+    CLEAR ls_toolbar.
+
+    "BOTON INFO CONCESIONARIO
+    ls_toolbar-function = 'INFO_CONC'.
+    ls_toolbar-icon = '@0Q@'.
+    ls_toolbar-quickinfo = 'Info concesionario'.
+    ls_toolbar-text = 'Info concesionario'.
+
+    APPEND ls_toolbar TO e_object->mt_toolbar.
+    CLEAR ls_toolbar.
+
+    "BOTON INFO COCHE
+    ls_toolbar-function = 'INFO_COCHE'.
+    ls_toolbar-icon = '@0Q@'.
+    ls_toolbar-quickinfo = 'Info coche'.
+    ls_toolbar-text = 'Info coche'.
+
+    APPEND ls_toolbar TO e_object->mt_toolbar.
+    CLEAR ls_toolbar.
+
+    "BOTON ENVIO POR EMAIL
+    ls_toolbar-function = 'EMAIL'.
+    ls_toolbar-icon = '@1S@'.
+    ls_toolbar-quickinfo = 'Enviar por email'.
+    ls_toolbar-text = 'Enviar email'.
+
+    APPEND ls_toolbar TO e_object->mt_toolbar.
+    CLEAR ls_toolbar.
+
+    "BOTON IMPRIMIR
+    ls_toolbar-function = 'IMPR'.
+    ls_toolbar-icon = '@2P@'.
+    ls_toolbar-quickinfo = 'Imprimir'.
+    ls_toolbar-text = 'Imprimir'.
+
+    APPEND ls_toolbar TO e_object->mt_toolbar.
+    CLEAR ls_toolbar.
+
+    "BOTON EXPORTAR CSV
+    ls_toolbar-function = 'EXPORT_CSV'.
+    ls_toolbar-icon = '@49@'.
+    ls_toolbar-quickinfo = 'Exportar a .csv'.
+    ls_toolbar-text = 'Exportar a .csv'.
+
+    APPEND ls_toolbar TO e_object->mt_toolbar.
+    CLEAR ls_toolbar.
+
+  ENDMETHOD.
+
+  METHOD handle_user_command.
+    CASE e_ucomm.
+      WHEN 'INFO_CONC'.
+        PERFORM popup_concesionario.
+      WHEN 'INFO_COCHE'.
+        PERFORM popup_coche.
+      WHEN 'EMAIL'.
+        PERFORM popup_email.
+      WHEN 'IMPR'.
+        PERFORM imprimir_smartform.
+      WHEN 'EXPORT_CSV'.
+        PERFORM exportar_csv.
+    ENDCASE.
+  ENDMETHOD.
+
+ENDCLASS.
+
+DATA: gcl_event TYPE REF TO lcl_event.
+
+"CREAR LOG
+"Variables LOG
+DATA: gv_log_handle TYPE balloghndl,
+      gv_text_log   TYPE char255,
+      gv_tipo_log   TYPE char01.
